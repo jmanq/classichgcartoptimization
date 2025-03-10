@@ -4,7 +4,7 @@
   "type": "module",
   "author": "Jake Forte",
   "license": "MIT",
-  "main":"main.tsx",
+  "main":"src/main.tsx",
   "description": "Cart Optimization for Classic Home and Garden",
   "scripts": {
     "dev": "vite",
