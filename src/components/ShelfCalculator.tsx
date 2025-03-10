@@ -4,14 +4,16 @@ import { LayoutResult, TrayType, TrayPosition, TabType } from '../types';
 
 const TRAY_MARGIN = 0.25; // Margin between trays in inches
 
+interface RemainingSpace {
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+}
+
 interface LayoutCalculation {
   positions: TrayPosition[];
-  remainingSpace: {
-    width: number;
-    height: number;
-    x: number;
-    y: number;
-  };
+  remainingSpaces: RemainingSpace[];
 }
 
 function calculateMainLayout(
@@ -47,49 +49,72 @@ function calculateMainLayout(
     }
   }
 
-  // Calculate remaining space
-  const remainingSpace = {
-    width: shelfWidth - usedWidth,
-    height: shelfLength,
-    x: usedWidth + TRAY_MARGIN,
-    y: 0
-  };
+  // Calculate remaining spaces
+  const remainingSpaces: RemainingSpace[] = [];
 
-  return { positions, remainingSpace };
+  // Right space
+  if (shelfWidth - usedWidth > TRAY_MARGIN) {
+    remainingSpaces.push({
+      width: shelfWidth - usedWidth - TRAY_MARGIN,
+      height: shelfLength,
+      x: usedWidth + TRAY_MARGIN,
+      y: 0
+    });
+  }
+
+  // Bottom space
+  if (shelfLength - usedLength > TRAY_MARGIN) {
+    remainingSpaces.push({
+      width: usedWidth,
+      height: shelfLength - usedLength - TRAY_MARGIN,
+      x: 0,
+      y: usedLength + TRAY_MARGIN
+    });
+  }
+
+  return { positions, remainingSpaces };
 }
 
 function tryFitInRemainingSpace(
-  space: { width: number; height: number; x: number; y: number },
+  space: RemainingSpace,
   trayWidth: number,
   trayLength: number
 ): TrayPosition[] {
   const positions: TrayPosition[] = [];
 
   // Try vertical orientation first (rotated 90 degrees)
-  if (space.width >= trayLength && space.height >= trayWidth) {
-    const maxVertical = Math.floor(space.height / (trayWidth + TRAY_MARGIN));
-    for (let i = 0; i < maxVertical; i++) {
-      positions.push({
-        x: space.x,
-        y: i * (trayWidth + TRAY_MARGIN),
-        isVertical: true,
-        trayWidth: trayLength,
-        trayLength: trayWidth
-      });
+  if (space.width >= trayLength) {
+    const traysAcross = Math.floor((space.width + TRAY_MARGIN) / (trayLength + TRAY_MARGIN));
+    const traysDown = Math.floor((space.height + TRAY_MARGIN) / (trayWidth + TRAY_MARGIN));
+    
+    for (let col = 0; col < traysAcross; col++) {
+      for (let row = 0; row < traysDown; row++) {
+        positions.push({
+          x: space.x + col * (trayLength + TRAY_MARGIN),
+          y: space.y + row * (trayWidth + TRAY_MARGIN),
+          isVertical: true,
+          trayWidth: trayLength,
+          trayLength: trayWidth
+        });
+      }
     }
   }
 
-  // Try horizontal orientation
-  if (positions.length === 0 && space.width >= trayWidth && space.height >= trayLength) {
-    const maxHorizontal = Math.floor(space.height / (trayLength + TRAY_MARGIN));
-    for (let i = 0; i < maxHorizontal; i++) {
-      positions.push({
-        x: space.x,
-        y: i * (trayLength + TRAY_MARGIN),
-        isVertical: false,
-        trayWidth,
-        trayLength
-      });
+  // If no vertical trays fit, try horizontal orientation
+  if (positions.length === 0 && space.width >= trayWidth) {
+    const traysAcross = Math.floor((space.width + TRAY_MARGIN) / (trayWidth + TRAY_MARGIN));
+    const traysDown = Math.floor((space.height + TRAY_MARGIN) / (trayLength + TRAY_MARGIN));
+    
+    for (let col = 0; col < traysAcross; col++) {
+      for (let row = 0; row < traysDown; row++) {
+        positions.push({
+          x: space.x + col * (trayWidth + TRAY_MARGIN),
+          y: space.y + row * (trayLength + TRAY_MARGIN),
+          isVertical: false,
+          trayWidth,
+          trayLength
+        });
+      }
     }
   }
 
@@ -105,15 +130,19 @@ function findOptimalLayout(
   const horizontal = calculateMainLayout(shelfWidth, shelfLength, tray.tod.width, tray.tod.length, false);
   const vertical = calculateMainLayout(shelfWidth, shelfLength, tray.tod.width, tray.tod.length, true);
 
-  // Try mixed layouts with remaining space
+  // Try mixed layouts with remaining spaces
   const horizontalWithExtra = {
     main: horizontal.positions,
-    extra: tryFitInRemainingSpace(horizontal.remainingSpace, tray.tod.width, tray.tod.length)
+    extra: horizontal.remainingSpaces.flatMap(space => 
+      tryFitInRemainingSpace(space, tray.tod.width, tray.tod.length)
+    )
   };
 
   const verticalWithExtra = {
     main: vertical.positions,
-    extra: tryFitInRemainingSpace(vertical.remainingSpace, tray.tod.width, tray.tod.length)
+    extra: vertical.remainingSpaces.flatMap(space => 
+      tryFitInRemainingSpace(space, tray.tod.width, tray.tod.length)
+    )
   };
 
   // Choose the layout with the most total trays
