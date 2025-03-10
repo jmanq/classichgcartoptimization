@@ -4,6 +4,7 @@
   "type": "module",
   "author": "Jake Forte",
   "license": "MIT",
+  "main":"index.html",
   "description": "Cart Optimization for Classic Home and Garden",
   "scripts": {
     "dev": "vite",
