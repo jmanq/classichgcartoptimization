@@ -2,8 +2,7 @@
   "name": "classic-home-and-garden-cart-optimization",
   "version": "1.0.0",
   "type": "module",
-  "main":"main.js",
-  "author":"Jake Forte",
+  "author": "Jake Forte",
   "license": "MIT",
   "description": "Cart Optimization for Classic Home and Garden",
   "scripts": {
@@ -24,6 +23,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
+    "electron": "^35.0.1",
     "electron-builder": "^25.1.8",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
@@ -36,19 +36,19 @@
     "vite": "^5.4.2"
   },
   "build": {
-  "appId": "com.yourcompany.shelflayout",
-  "productName": "Shelf Layout Generator",
-  "directories": {
-    "output": "dist"
-  },
-  "win": {
-    "target": "nsis",
-    "icon": "assets/icon.ico"
-  },
-  "nsis": {
-    "oneClick": true,
-    "perMachine": false,
-    "allowToChangeInstallationDirectory": true
+    "appId": "com.yourcompany.shelflayout",
+    "productName": "Shelf Layout Generator",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
-}
 }
