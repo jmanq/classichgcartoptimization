@@ -1,33 +1,22 @@
-import { app, BrowserWindow } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const isDev = process.env.NODE_ENV === "development";
-function createWindow() {
-  const mainWindow = new BrowserWindow({
+import { app as e, BrowserWindow as t } from "electron";
+import n from "path";
+import { fileURLToPath as a } from "url";
+const l = a(import.meta.url), r = n.dirname(l), s = process.env.NODE_ENV === "development";
+function i() {
+  const o = new t({
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: !0,
+      contextIsolation: !1
     }
   });
-  if (isDev) {
-    mainWindow.loadURL("http://localhost:5173");
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
-  }
+  s ? (o.loadURL("http://localhost:5173"), o.webContents.openDevTools()) : o.loadFile(n.join(r, "../dist/index.html"));
 }
-app.whenReady().then(createWindow);
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+e.whenReady().then(i);
+e.on("window-all-closed", () => {
+  process.platform !== "darwin" && e.quit();
 });
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
+e.on("activate", () => {
+  t.getAllWindows().length === 0 && i();
 });
