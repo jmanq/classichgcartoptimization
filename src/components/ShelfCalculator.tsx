@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { potSizes, stadiumPotSizes, threeDPotSizes } from '../data/trayData';
 import { LayoutResult, TrayType, TrayPosition, TabType } from '../types';
+import { Printer } from 'lucide-react';
 
-const TRAY_MARGIN = 0.25; // Margin between trays in inches
+
+const TRAY_MARGIN = 0.001; // Margin between trays in inches
 
 interface RemainingSpace {
   width: number;
@@ -178,10 +180,105 @@ function ShelfDiagram({ result }: { result: LayoutResult }) {
     const scaleY = maxHeight / result.shelfLength;
     setScale(Math.min(scaleX, scaleY, 25));
   }, [result.shelfWidth, result.shelfLength]);
+  const handlePrint = () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @media print {
+        @page {
+          size: landscape;
+          margin: 1cm;
+        }
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          padding: 20px;
+          visibility: hidden;
+        }
+        #print-content {
+          visibility: visible;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        .diagram {
+          border: 2px solid #666;
+          position: relative;
+          background: #f9fafb;
+          page-break-inside: avoid;
+        }
+        .tray {
+          position: absolute;
+          border: 1px solid #3b82f6;
+          background: #dbeafe;
+        }
+        .tray-count {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          color: #1e40af;
+        }
+        .info {
+          margin-top: 20px;
+          page-break-inside: avoid;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const printContent = document.createElement('div');
+    printContent.id = 'print-content';
+    const printScale = Math.min(600 / result.shelfWidth, 800 / result.shelfLength);
+
+    printContent.innerHTML = `
+      <h1 style="font-size: 24px; margin-bottom: 16px;">${result.trayType.name} Layout</h1>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+        <div style="background: #f3f4f6; padding: 12px; border-radius: 6px;">
+          <strong>Total Trays:</strong> ${result.totalTrays}<br>
+          <strong>Total Pots:</strong> ${result.totalPots}
+        </div>
+        <div style="background: #f3f4f6; padding: 12px; border-radius: 6px;">
+          <strong>Shelf Dimensions:</strong><br>
+          Width: ${result.shelfWidth.toFixed(2)}"<br>
+          Length: ${result.shelfLength.toFixed(2)}"
+        </div>
+      </div>
+      <div class="diagram" style="width: ${result.shelfWidth * printScale}px; height: ${result.shelfLength * printScale}px;">
+        ${result.positions.map(pos => `
+          <div class="tray" style="
+            width: ${pos.trayWidth * printScale}px;
+            height: ${pos.trayLength * printScale}px;
+            left: ${pos.x * printScale}px;
+            top: ${pos.y * printScale}px;
+          ">
+            <div class="tray-count">${result.trayType.count}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    document.body.appendChild(printContent);
+    window.print();
+    
+    // Cleanup after printing
+    document.body.removeChild(printContent);
+    document.head.removeChild(style);
+  };
 
   return (
-    <div className="mb-8 p-6 border rounded-lg bg-white shadow-sm" ref={containerRef}>
-      <h3 className="text-xl font-semibold mb-4">{result.trayType.name} Layout</h3>
+    <div className="mb-8 p-6 border rounded-lg bg-white shadow-sm print:shadow-none" ref={containerRef}>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-xl font-semibold">{result.trayType.name} Layout</h3>
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print Layout
+        </button>
+      </div>
       <div className="flex gap-8 items-start">
         <div className="relative border-2 border-gray-400 bg-gray-50 shadow-inner">
           <div

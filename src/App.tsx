@@ -17,7 +17,7 @@ function App() {
                 : 'bg-white text-gray-600 hover:bg-gray-100'
             }`}
           >
-            Classic Home and Garden
+            HC X CHG
           </button>
           <button
             onClick={() => setActiveTab('stadium')}
