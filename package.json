@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "main": "electron/main.mjs",
+  "author":"Jake Forte",
+  "description": "An app to calculate the optimal layout of trays on a shelf.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
