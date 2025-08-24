@@ -29,4 +29,11 @@ export interface LayoutResult {
   shelfLength: number;
 }
 
-export type TabType = 'classic' | 'stadium' | '3d';
+export type TabType = 'classic' | 'stadium' | '3d' | 'custom';
+
+export interface CustomTray {
+  name: string;
+  width: number;
+  length: number;
+  count: number;
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ShelfCalculator from './components/ShelfCalculator';
+import CustomCalculator from './components/CustomCalculator';
 import { TabType } from './types';
 
 function App() {
@@ -39,8 +40,22 @@ function App() {
           >
             3D - Forever Forward
           </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'custom'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Custom
+          </button>
         </div>
-        <ShelfCalculator type={activeTab} />
+        {activeTab === 'custom' ? (
+          <CustomCalculator />
+        ) : (
+          <ShelfCalculator type={activeTab} />
+        )}
       </div>
     </div>
   );
