@@ -50,6 +50,16 @@ function App() {
           >
             Custom
           </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+              activeTab === 'custom'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            Custom
+          </button>
         </div>
         {activeTab === 'custom' ? (
           <CustomCalculator />
