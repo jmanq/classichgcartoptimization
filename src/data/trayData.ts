@@ -19,6 +19,30 @@ export const potSizes: PotSize[] = [
           length: 7.01
         },
         count: 12
+      },
+      {
+        name: "Keystone 1 Pint 12-Regular Tray",
+        tod: {
+          width: 21.15,
+          length: 6.11
+        },
+        count: 12
+      },
+      {
+        name: "Keystone Metro 1 Pint 12-Injection Tray",
+        tod: {
+          width: 19.89,
+          length: 6.07
+        },
+        count: 12
+      },
+      {
+        name: "Keystone Metro 1 Pint 12-Coex Tray",
+        tod: {
+          width: 20.08,
+          length: 6.07
+        },
+        count: 12
       }
     ]
   },
@@ -30,6 +54,14 @@ export const potSizes: PotSize[] = [
         tod: {
           width: 14.26,
           length: 7.92
+        },
+        count: 8
+      },
+      {
+        name: "Keystone Metro 1.5 Pint 8-Regular Tray",
+        tod: {
+          width: 15.91,
+          length: 7.13
         },
         count: 8
       },
@@ -48,7 +80,7 @@ export const potSizes: PotSize[] = [
           length: 7.92
         },
         count: 12
-      }
+      },
     ]
   },
   {
@@ -73,8 +105,53 @@ export const potSizes: PotSize[] = [
     ]
   },
   {
+    size: "1.5 Quart",
+    trays: [
+      {
+        name: "Keystone 1.5 Quart 6-Regular Tray",
+        tod: {
+          width: 17.88,
+          length: 9.85
+        },
+        count: 6
+      },
+      {
+        name: "Keystone 1.5 Quart 6-Turned Tray",
+        tod: {
+          width: 14.81,
+          length: 11.97
+        },
+        count: 6
+      },
+      {
+        name: "Keystone 1.5 Quart 8-Regular Tray",
+        tod: {
+          width:   23.82,
+          length: 9.85
+        },
+        count: 8
+      },
+      {
+        name: "Keystone 1.5 Quart 8-Turned Tray",
+        tod: {
+          width: 19.69,
+          length: 11.97
+        },
+        count: 8
+      }
+    ]
+  },
+  {
     size: "2 Quart",
     trays: [
+      {
+        name: "Keystone 2 Quart 3-Regular Tray",
+        tod: {
+          width: 18.00,
+          length: 4.93
+        },
+        count: 3
+      },
       {
         name: "2 Quart 6-Turned Tray",
         tod: {
