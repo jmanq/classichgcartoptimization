@@ -37,10 +37,3 @@ export interface CustomTray {
   length: number;
   count: number;
 }
-
-export interface SavedLayout {
-  id: string;
-  name: string;
-  result: LayoutResult;
-  dateAdded: Date;
-}

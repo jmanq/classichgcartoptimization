@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { potSizes, stadiumPotSizes, threeDPotSizes } from '../data/trayData';
 import { LayoutResult, TrayType, TrayPosition, TabType } from '../types';
-import { Printer, Plus } from 'lucide-react';
+import { Printer } from 'lucide-react';
 
 
 const TRAY_MARGIN = 0.001; // Margin between trays in inches
@@ -165,7 +165,7 @@ function findOptimalLayout(
   };
 }
 
-function ShelfDiagram({ result, onAddToCustom }: { result: LayoutResult; onAddToCustom?: (result: LayoutResult) => void }) {
+function ShelfDiagram({ result }: { result: LayoutResult }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
 
@@ -271,24 +271,13 @@ function ShelfDiagram({ result, onAddToCustom }: { result: LayoutResult; onAddTo
     <div className="mb-8 p-6 border rounded-lg bg-white shadow-sm print:shadow-none" ref={containerRef}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">{result.trayType.name} Layout</h3>
-        <div className="flex gap-2">
-          {onAddToCustom && (
-            <button
-              onClick={() => onAddToCustom(result)}
-              className="inline-flex items-center px-3 py-2 border border-green-300 shadow-sm text-sm leading-4 font-medium rounded-md text-green-700 bg-green-50 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add to Custom
-            </button>
-          )}
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Print Layout
-          </button>
-        </div>
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print Layout
+        </button>
       </div>
       <div className="flex gap-8 items-start">
         <div className="relative border-2 border-gray-400 bg-gray-50 shadow-inner">
@@ -346,10 +335,9 @@ function ShelfDiagram({ result, onAddToCustom }: { result: LayoutResult; onAddTo
 
 interface ShelfCalculatorProps {
   type: TabType;
-  onAddToCustom?: (result: LayoutResult) => void;
 }
 
-export default function ShelfCalculator({ type, onAddToCustom }: ShelfCalculatorProps) {
+export default function ShelfCalculator({ type }: ShelfCalculatorProps) {
   const [width, setWidth] = useState<string>('60.25');
   const [length, setLength] = useState<string>('20.5');
   const sizes = type === 'classic' ? potSizes : type === 'stadium' ? stadiumPotSizes : threeDPotSizes;
@@ -416,7 +404,7 @@ export default function ShelfCalculator({ type, onAddToCustom }: ShelfCalculator
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">Layout Options</h3>
         {layouts.map((layout, index) => (
-          <ShelfDiagram key={index} result={layout} onAddToCustom={onAddToCustom} />
+          <ShelfDiagram key={index} result={layout} />
         ))}
       </div>
     </div>

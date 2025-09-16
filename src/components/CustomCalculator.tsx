@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutResult, TrayPosition, CustomTray, SavedLayout } from '../types';
-import { Printer, Plus, Trash2, Save } from 'lucide-react';
+import { LayoutResult, TrayPosition, CustomTray } from '../types';
+import { Printer } from 'lucide-react';
 
 const TRAY_MARGIN = 0.001; // Margin between trays in inches
 
@@ -173,11 +173,7 @@ function findOptimalLayout(
   };
 }
 
-function ShelfDiagram({ result, onRemove, showRemove = false }: { 
-  result: LayoutResult; 
-  onRemove?: () => void;
-  showRemove?: boolean;
-}) {
+function ShelfDiagram({ result }: { result: LayoutResult }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
 
@@ -284,24 +280,13 @@ function ShelfDiagram({ result, onRemove, showRemove = false }: {
     <div className="mb-8 p-6 border rounded-lg bg-white shadow-sm print:shadow-none" ref={containerRef}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">{result.trayType.name} Layout</h3>
-        <div className="flex gap-2">
-          {showRemove && onRemove && (
-            <button
-              onClick={onRemove}
-              className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Remove
-            </button>
-          )}
-          <button
-            onClick={handlePrint}
-            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Print Layout
-          </button>
-        </div>
+        <button
+          onClick={handlePrint}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <Printer className="h-4 w-4 mr-2" />
+          Print Layout
+        </button>
       </div>
       <div className="flex gap-8 items-start">
         <div className="relative border-2 border-gray-400 bg-gray-50 shadow-inner">
