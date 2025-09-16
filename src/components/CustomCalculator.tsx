@@ -366,10 +366,123 @@ interface CustomCalculatorProps {
 export default function CustomCalculator({ savedLayouts, setSavedLayouts, removeFromCustom }: CustomCalculatorProps) {
   const [shelfWidth, setShelfWidth] = useState<string>('60.25');
   const [shelfLength, setShelfLength] = useState<string>('20.5');
+  const [customTitle, setCustomTitle] = useState<string>('Custom Layout Collection');
   const [trayName, setTrayName] = useState<string>('Custom Tray');
   const [trayWidth, setTrayWidth] = useState<string>('18.00');
   const [trayLength, setTrayLength] = useState<string>('8.00');
   const [potCount, setPotCount] = useState<string>('10');
+
+  const handlePrintCustomPage = () => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @media print {
+        @page {
+          size: landscape;
+          margin: 1cm;
+        }
+        body {
+          font-family: system-ui, -apple-system, sans-serif;
+          padding: 20px;
+          visibility: hidden;
+        }
+        #print-custom-content {
+          visibility: visible;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .diagram {
+          border: 2px solid #666;
+          position: relative;
+          background: #f9fafb;
+          page-break-inside: avoid;
+          page-break-after: always;
+          margin-bottom: 30px;
+        }
+        .diagram:last-child {
+          page-break-after: auto;
+        }
+        .tray {
+          position: absolute;
+          border: 1px solid #3b82f6;
+          background: #dbeafe;
+        }
+        .tray-count {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          color: #1e40af;
+        }
+        .custom-title {
+          font-size: 28px;
+          margin-bottom: 24px;
+          text-align: center;
+          font-weight: bold;
+        }
+        .layout-section {
+          margin-bottom: 40px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const printContent = document.createElement('div');
+    printContent.id = 'print-custom-content';
+    
+    const printScale = 20; // Fixed scale for consistent printing
+    
+    printContent.innerHTML = `
+      <div class="custom-title">${customTitle}</div>
+      ${savedLayouts.map(savedLayout => {
+        const result = savedLayout.result;
+        return `
+          <div class="layout-section">
+            <h2 style="font-size: 20px; margin-bottom: 16px; font-weight: 600;">${result.trayType.name}</h2>
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 24px; margin-bottom: 16px;">
+              <div class="diagram" style="width: ${result.shelfWidth * printScale}px; height: ${result.shelfLength * printScale}px;">
+                ${result.positions.map(pos => `
+                  <div class="tray" style="
+                    width: ${pos.trayWidth * printScale}px;
+                    height: ${pos.trayLength * printScale}px;
+                    left: ${pos.x * printScale}px;
+                    top: ${pos.y * printScale}px;
+                  ">
+                    <div class="tray-count">${result.trayType.count}</div>
+                  </div>
+                `).join('')}
+              </div>
+              <div style="padding-left: 20px;">
+                <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                  <h4 style="font-weight: 600; margin-bottom: 8px;">Layout Summary</h4>
+                  <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin-bottom: 4px;">${result.totalTrays} Trays</p>
+                  <p style="font-size: 18px; font-weight: bold; color: #16a34a;">${result.totalPots} Pots</p>
+                </div>
+                <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
+                  <h4 style="font-weight: 600; margin-bottom: 8px;">Dimensions</h4>
+                  <p style="margin-bottom: 4px;">Tray: ${result.trayType.tod.width.toFixed(2)}" × ${result.trayType.tod.length.toFixed(2)}"</p>
+                  <p>Shelf: ${result.shelfWidth.toFixed(2)}" × ${result.shelfLength.toFixed(2)}"</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+
+    document.body.appendChild(printContent);
+    window.print();
+    
+    // Cleanup after printing
+    document.body.removeChild(printContent);
+    document.head.removeChild(style);
+  };
 
   const saveLayout = () => {
     if (layout) {
@@ -410,26 +523,30 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
 
   return (
     <div>
-      {savedLayouts.length > 0 && (
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Saved Layouts ({savedLayouts.length})</h3>
-          </div>
-          <div className="space-y-6">
-            {savedLayouts.map((savedLayout) => (
-              <ShelfDiagram 
-                key={savedLayout.id} 
-                result={savedLayout.result} 
-                onRemove={() => removeFromCustom(savedLayout.id)}
-                showRemove={true}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="no-print grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900">Print Settings</h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Custom Page Title
+            </label>
+            <input
+              type="text"
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Custom Layout Collection"
+            />
+          </div>
+          {savedLayouts.length > 0 && (
+            <button
+              onClick={handlePrintCustomPage}
+              className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Printer className="h-4 w-4 mr-2" />
+              Print All Saved Layouts
+            </button>
+          )}
           <h3 className="text-lg font-semibold mb-4 text-gray-900">Shelf Dimensions</h3>
           <div className="space-y-4">
             <div>
@@ -523,7 +640,7 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
       </div>
 
       {layout && (
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="no-print mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-semibold">Preview Layout</h3>
             <button
@@ -538,8 +655,26 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
         </div>
       )}
 
+      {savedLayouts.length > 0 && (
+        <div className="mt-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Saved Layouts ({savedLayouts.length})</h3>
+          </div>
+          <div className="space-y-6">
+            {savedLayouts.map((savedLayout) => (
+              <ShelfDiagram 
+                key={savedLayout.id} 
+                result={savedLayout.result} 
+                onRemove={() => removeFromCustom(savedLayout.id)}
+                showRemove={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {!layout && (shelfWidth || shelfLength || trayWidth || trayLength || potCount) && (
-        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="no-print mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-800">
             Please fill in all fields with valid numbers to see the layout calculation.
           </p>
