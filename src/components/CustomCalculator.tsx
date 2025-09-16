@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { LayoutResult, TrayPosition, CustomTray } from '../types';
-import { Printer } from 'lucide-react';
+import { LayoutResult, TrayPosition, CustomTray, SavedLayout } from '../types';
+import { Printer, Save, Trash2 } from 'lucide-react';
 
 const TRAY_MARGIN = 0.001; // Margin between trays in inches
 
@@ -173,7 +173,11 @@ function findOptimalLayout(
   };
 }
 
-function ShelfDiagram({ result }: { result: LayoutResult }) {
+function ShelfDiagram({ result, onRemove, showRemove = false }: { 
+  result: LayoutResult; 
+  onRemove?: () => void;
+  showRemove?: boolean;
+}) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [scale, setScale] = React.useState(1);
 
@@ -280,13 +284,24 @@ function ShelfDiagram({ result }: { result: LayoutResult }) {
     <div className="mb-8 p-6 border rounded-lg bg-white shadow-sm print:shadow-none" ref={containerRef}>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-xl font-semibold">{result.trayType.name} Layout</h3>
-        <button
-          onClick={handlePrint}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <Printer className="h-4 w-4 mr-2" />
-          Print Layout
-        </button>
+        <div className="flex gap-2">
+          {showRemove && onRemove && (
+            <button
+              onClick={onRemove}
+              className="inline-flex items-center px-3 py-2 border border-red-300 shadow-sm text-sm leading-4 font-medium rounded-md text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Remove
+            </button>
+          )}
+          <button
+            onClick={handlePrint}
+            className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print Layout
+          </button>
+        </div>
       </div>
       <div className="flex gap-8 items-start">
         <div className="relative border-2 border-gray-400 bg-gray-50 shadow-inner">
@@ -342,13 +357,35 @@ function ShelfDiagram({ result }: { result: LayoutResult }) {
   );
 }
 
-export default function CustomCalculator() {
+interface CustomCalculatorProps {
+  savedLayouts: SavedLayout[];
+  setSavedLayouts: React.Dispatch<React.SetStateAction<SavedLayout[]>>;
+  removeFromCustom: (id: string) => void;
+}
+
+export default function CustomCalculator({ savedLayouts, setSavedLayouts, removeFromCustom }: CustomCalculatorProps) {
   const [shelfWidth, setShelfWidth] = useState<string>('60.25');
   const [shelfLength, setShelfLength] = useState<string>('20.5');
   const [trayName, setTrayName] = useState<string>('Custom Tray');
   const [trayWidth, setTrayWidth] = useState<string>('18.00');
   const [trayLength, setTrayLength] = useState<string>('8.00');
   const [potCount, setPotCount] = useState<string>('10');
+
+  const saveLayout = () => {
+    if (layout) {
+      const newSavedLayout: SavedLayout = {
+        id: Date.now().toString(),
+        result: layout
+      };
+      setSavedLayouts(prev => [...prev, newSavedLayout]);
+      
+      // Reset form
+      setTrayName('Custom Tray');
+      setTrayWidth('18.00');
+      setTrayLength('8.00');
+      setPotCount('10');
+    }
+  };
 
   const layout = useMemo(() => {
     const numShelfWidth = parseFloat(shelfWidth);
@@ -373,6 +410,24 @@ export default function CustomCalculator() {
 
   return (
     <div>
+      {savedLayouts.length > 0 && (
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Saved Layouts ({savedLayouts.length})</h3>
+          </div>
+          <div className="space-y-6">
+            {savedLayouts.map((savedLayout) => (
+              <ShelfDiagram 
+                key={savedLayout.id} 
+                result={savedLayout.result} 
+                onRemove={() => removeFromCustom(savedLayout.id)}
+                showRemove={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-semibold mb-4 text-gray-900">Shelf Dimensions</h3>
@@ -468,8 +523,17 @@ export default function CustomCalculator() {
       </div>
 
       {layout && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">Custom Layout</h3>
+        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Preview Layout</h3>
+            <button
+              onClick={saveLayout}
+              className="inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Layout
+            </button>
+          </div>
           <ShelfDiagram result={layout} />
         </div>
       )}

@@ -2,10 +2,24 @@ import React, { useState } from 'react';
 import { Printer } from 'lucide-react';
 import ShelfCalculator from './components/ShelfCalculator';
 import CustomCalculator from './components/CustomCalculator';
-import { TabType } from './types';
+import { TabType, SavedLayout } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('classic');
+  const [savedLayouts, setSavedLayouts] = useState<SavedLayout[]>([]);
+
+  const addToCustom = (result: any) => {
+    const newLayout: SavedLayout = {
+      id: Date.now().toString(),
+      result
+    };
+    setSavedLayouts(prev => [...prev, newLayout]);
+    setActiveTab('custom');
+  };
+
+  const removeFromCustom = (id: string) => {
+    setSavedLayouts(prev => prev.filter(layout => layout.id !== id));
+  };
 
   const handlePrintPage = () => {
     const style = document.createElement('style');
@@ -148,9 +162,13 @@ function App() {
           </button>
         </div>
         {activeTab === 'custom' ? (
-          <CustomCalculator />
+          <CustomCalculator 
+            savedLayouts={savedLayouts}
+            setSavedLayouts={setSavedLayouts}
+            removeFromCustom={removeFromCustom}
+          />
         ) : (
-          <ShelfCalculator type={activeTab} />
+          <ShelfCalculator type={activeTab} onAddToCustom={addToCustom} />
         )}
       </div>
     </div>
