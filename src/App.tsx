@@ -148,9 +148,13 @@ function App() {
           </button>
         </div>
         {activeTab === 'custom' ? (
-          <CustomCalculator />
+          <CustomCalculator 
+            savedLayouts={savedLayouts}
+            onSaveLayout={handleSaveLayout}
+            onRemoveLayout={handleRemoveLayout}
+          />
         ) : (
-          <ShelfCalculator type={activeTab} />
+          <ShelfCalculator type={activeTab} onAddToCustom={handleAddToCustom} />
         )}
       </div>
     </div>

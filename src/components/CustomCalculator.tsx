@@ -483,17 +483,42 @@ export default function CustomCalculator() {
       </div>
 
       {layout && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">Custom Layout</h3>
+        <div className="mt-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Preview Layout</h3>
+            <button
+              onClick={handleSaveLayout}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Layout
+            </button>
+          </div>
           <ShelfDiagram result={layout} />
         </div>
       )}
 
       {!layout && (shelfWidth || shelfLength || trayWidth || trayLength || potCount) && (
-        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
           <p className="text-yellow-800">
             Please fill in all fields with valid numbers to see the layout calculation.
           </p>
+        </div>
+      )}
+
+      {savedLayouts.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4">Saved Layouts ({savedLayouts.length})</h3>
+          <div className="space-y-6">
+            {savedLayouts.map((savedLayout) => (
+              <ShelfDiagram 
+                key={savedLayout.id} 
+                result={savedLayout.result} 
+                onRemove={() => onRemoveLayout(savedLayout.id)}
+                showRemove={true}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
