@@ -58,7 +58,7 @@ export const potSizes: PotSize[] = [
         count: 8
       },
       {
-        name: "Keystone Metro 1.5 Pint 8-Regular Tray",
+        name: "Keystone 1.5 Pint 8-Regular Tray",
         tod: {
           width: 15.91,
           length: 7.13
