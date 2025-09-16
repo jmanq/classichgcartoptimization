@@ -8,11 +8,11 @@
   "description": "An app to calculate the optimal layout of trays on a shelf.",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "ELECTRON=true vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite\" \"electron .\"",
-    "electron:build": "vite build && electron-builder",
+    "electron:build": "ELECTRON=true vite build && electron-builder",
     "postinstall": "electron-builder install-app-dependencies"
   },
   "dependencies": {

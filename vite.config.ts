@@ -9,8 +9,12 @@ export default defineConfig({
       entry: 'electron/main.mjs'
     })
   ],
-  base: './',
+  base: process.env.ELECTRON === 'true' ? './' : '/',
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
+  }
 });

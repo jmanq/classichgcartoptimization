@@ -5,15 +5,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = !app.isPackaged;
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
@@ -21,8 +21,13 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   }
+
+  // Handle navigation errors
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.log('Failed to load:', errorCode, errorDescription);
+  });
 }
 
 app.whenReady().then(createWindow);
