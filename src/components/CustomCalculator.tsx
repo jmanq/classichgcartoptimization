@@ -377,12 +377,12 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
     style.textContent = `
       @media print {
         @page {
-          size: landscape;
-          margin: 1cm;
+          size: 11in 8.5in;
+          margin: 0.5in;
         }
         body {
           font-family: system-ui, -apple-system, sans-serif;
-          padding: 20px;
+          padding: 0;
           visibility: hidden;
         }
         #print-custom-content {
@@ -391,20 +391,40 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
           left: 0;
           top: 0;
           width: 100%;
+          height: 100%;
         }
         .no-print {
           display: none !important;
+        }
+        .custom-title {
+          font-size: 24px;
+          margin-bottom: 20px;
+          text-align: center;
+          font-weight: bold;
+        }
+        .layout-section {
+          page-break-before: always;
+          page-break-after: always;
+          height: 100vh;
+          display: flex;
+          flex-direction: column;
+          padding: 20px;
+          box-sizing: border-box;
+        }
+        .layout-section:first-child {
+          page-break-before: auto;
+        }
+        .layout-content {
+          display: flex;
+          gap: 30px;
+          align-items: flex-start;
+          flex: 1;
         }
         .diagram {
           border: 2px solid #666;
           position: relative;
           background: #f9fafb;
-          page-break-inside: avoid;
-          page-break-after: always;
-          margin-bottom: 30px;
-        }
-        .diagram:last-child {
-          page-break-after: auto;
+          flex-shrink: 0;
         }
         .tray {
           position: absolute;
@@ -419,15 +439,33 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
           justify-content: center;
           font-weight: 600;
           color: #1e40af;
+          font-size: 12px;
         }
-        .custom-title {
-          font-size: 28px;
-          margin-bottom: 24px;
-          text-align: center;
+        .layout-info {
+          flex: 1;
+          min-width: 250px;
+        }
+        .info-section {
+          background: #f3f4f6;
+          padding: 16px;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+        .info-title {
+          font-weight: 600;
+          margin-bottom: 8px;
+          font-size: 16px;
+        }
+        .info-value {
+          font-size: 18px;
           font-weight: bold;
+          margin-bottom: 4px;
         }
-        .layout-section {
-          margin-bottom: 40px;
+        .info-value.trays {
+          color: #2563eb;
+        }
+        .info-value.pots {
+          color: #16a34a;
         }
       }
     `;
@@ -436,38 +474,54 @@ export default function CustomCalculator({ savedLayouts, setSavedLayouts, remove
     const printContent = document.createElement('div');
     printContent.id = 'print-custom-content';
     
-    const printScale = 20; // Fixed scale for consistent printing
+    // Calculate optimal scale for each layout to fit on page
+    const maxDiagramWidth = 400; // Max width for diagram in print
+    const maxDiagramHeight = 300; // Max height for diagram in print
     
     printContent.innerHTML = `
       <div class="custom-title">${customTitle}</div>
       ${savedLayouts.map(savedLayout => {
         const result = savedLayout.result;
+        
+        // Calculate scale to fit diagram optimally on page
+        const scaleX = maxDiagramWidth / result.shelfWidth;
+        const scaleY = maxDiagramHeight / result.shelfLength;
+        const optimalScale = Math.min(scaleX, scaleY, 15); // Cap at 15 for readability
+        
+        const diagramWidth = result.shelfWidth * optimalScale;
+        const diagramHeight = result.shelfLength * optimalScale;
+        
         return `
           <div class="layout-section">
-            <h2 style="font-size: 20px; margin-bottom: 16px; font-weight: 600;">${result.trayType.name}</h2>
-            <div style="display: grid; grid-template-columns: auto 1fr; gap: 24px; margin-bottom: 16px;">
-              <div class="diagram" style="width: ${result.shelfWidth * printScale}px; height: ${result.shelfLength * printScale}px;">
+            <h2 style="font-size: 20px; margin-bottom: 20px; font-weight: 600;">${result.trayType.name}</h2>
+            <div class="layout-content">
+              <div class="diagram" style="width: ${diagramWidth}px; height: ${diagramHeight}px;">
                 ${result.positions.map(pos => `
                   <div class="tray" style="
-                    width: ${pos.trayWidth * printScale}px;
-                    height: ${pos.trayLength * printScale}px;
-                    left: ${pos.x * printScale}px;
-                    top: ${pos.y * printScale}px;
+                    width: ${pos.trayWidth * optimalScale}px;
+                    height: ${pos.trayLength * optimalScale}px;
+                    left: ${pos.x * optimalScale}px;
+                    top: ${pos.y * optimalScale}px;
                   ">
                     <div class="tray-count">${result.trayType.count}</div>
                   </div>
                 `).join('')}
               </div>
-              <div style="padding-left: 20px;">
-                <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                  <h4 style="font-weight: 600; margin-bottom: 8px;">Layout Summary</h4>
-                  <p style="font-size: 18px; font-weight: bold; color: #2563eb; margin-bottom: 4px;">${result.totalTrays} Trays</p>
-                  <p style="font-size: 18px; font-weight: bold; color: #16a34a;">${result.totalPots} Pots</p>
+              <div class="layout-info">
+                <div class="info-section">
+                  <div class="info-title">Layout Summary</div>
+                  <div class="info-value trays">${result.totalTrays} Trays</div>
+                  <div class="info-value pots">${result.totalPots} Pots</div>
                 </div>
-                <div style="background: #f3f4f6; padding: 16px; border-radius: 8px;">
-                  <h4 style="font-weight: 600; margin-bottom: 8px;">Dimensions</h4>
-                  <p style="margin-bottom: 4px;">Tray: ${result.trayType.tod.width.toFixed(2)}" × ${result.trayType.tod.length.toFixed(2)}"</p>
-                  <p>Shelf: ${result.shelfWidth.toFixed(2)}" × ${result.shelfLength.toFixed(2)}"</p>
+                <div class="info-section">
+                  <div class="info-title">Dimensions</div>
+                  <div>Tray: ${result.trayType.tod.width.toFixed(2)}" × ${result.trayType.tod.length.toFixed(2)}"</div>
+                  <div>Shelf: ${result.shelfWidth.toFixed(2)}" × ${result.shelfLength.toFixed(2)}"</div>
+                </div>
+                <div class="info-section">
+                  <div class="info-title">Efficiency</div>
+                  <div>Pots per sq ft: ${(result.totalPots / ((result.shelfWidth * result.shelfLength) / 144)).toFixed(1)}</div>
+                  <div>Scale: 1" = ${(1/optimalScale).toFixed(2)}"</div>
                 </div>
               </div>
             </div>
