@@ -199,6 +199,14 @@ export const stadiumPotSizes: PotSize[] = [
           length: 8.00
         },
         count: 12
+      },
+      {
+        name: "Stadium 1 Pint New 12-Count Tray",
+        tod: {
+          width: 20.00,
+          length: 6.00
+        },
+        count: 12
       }
     ]
   },
